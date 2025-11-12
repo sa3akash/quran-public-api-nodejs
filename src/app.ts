@@ -8,6 +8,7 @@ import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "./swagger.json";
+import cors from "cors";
 
 const app = express();
 
@@ -66,6 +67,14 @@ app.use(
     limit: 50,
     standardHeaders: "draft-7",
     legacyHeaders: false,
+  })
+);
+
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET"],
+    allowedHeaders: ["Content-Type"],
   })
 );
 
