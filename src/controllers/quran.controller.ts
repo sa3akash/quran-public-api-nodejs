@@ -1,6 +1,8 @@
 import type { Request, Response } from "express";
 import {
+  getAvailableLanguages,
   getFallbackLanguage,
+  getQuranData,
   getQuranFileName,
   loadQuranFromDisk,
 } from "../utils/quran-utils";
@@ -8,41 +10,28 @@ import fs from "fs/promises";
 import path from "path";
 import { ServerError } from "error-express";
 
-// Simple per-language cache with mtime-based invalidation
-type CacheEntry = {
-  data: any;
-  mtimeMs: number;
-};
-
-const QuranCache = new Map<string, CacheEntry>();
-
-function makeCacheKey(lang: string): string {
-  return `quran_${lang}`;
-}
-
 export class QuranController {
   static async getQuran(req: Request, res: Response) {
     const lang = getFallbackLanguage(req.query.lang as string);
-    const fileName = getQuranFileName(lang);
 
-    const cacheKey = makeCacheKey(fileName);
+    const data = await getQuranData(lang);
 
-    const stat = await (async () => {
-      const { fileName } = { fileName: getQuranFileName(lang) };
-      const filePath = path.join(__dirname, "..", "utils", "quran", fileName);
-      const s = await fs.stat(filePath);
-      return s;
-    })();
+    const surahList = data.map((surah: any) => ({
+      id: surah.id,
+      name: surah.name,
+      transliteration: surah.transliteration,
+      translation: surah.translation,
+      type: surah.type,
+      total_verses: surah.total_verses,
+    }));
 
-    const cached = QuranCache.get(cacheKey);
-    if (cached && cached.mtimeMs === stat.mtimeMs) {
-      return res.json(cached.data);
-    }
+    const languages = getAvailableLanguages();
 
-    // Cache miss or changed file: reload
-    const { data, mtimeMs } = await loadQuranFromDisk(lang);
-    QuranCache.set(cacheKey, { data, mtimeMs });
-    res.json(data);
+    res.json({
+      language: lang,
+      available_languages: languages,
+      surahs: surahList,
+    });
   }
 
   static async search(req: Request, res: Response) {
@@ -56,10 +45,8 @@ export class QuranController {
       );
     }
 
-    const { data } = await loadQuranFromDisk(lang);
-    if (!data) {
-      throw new ServerError("Failed to load Quran data", 500);
-    }
+    const data = await getQuranData(lang);
+
     const searchResults = [];
 
     // Search through all surahs and verses
@@ -116,18 +103,163 @@ export class QuranController {
     });
   }
 
-  //   static async getQuran(req: Request, res: Response) {
-  //     const lang = getFallbackLanguage(req.query.lang as string);
-  //     const fileName = getQuranFileName(lang);
+  static async getLanguages(req: Request, res: Response) {
+    const languages = getAvailableLanguages();
+    res.json(languages);
+  }
 
-  //     const filePath = path.join(__dirname, "..", "utils", "quran", fileName);
-  //     await fs.access(filePath, fs.constants.R_OK);
+  static async getSurahById(req: Request, res: Response) {
+    const lang = getFallbackLanguage(req.query.lang as string);
+    const surahId = parseInt(req.params.id!, 10);
 
-  //     res.setHeader("Content-Type", "application/json");
-  //     const readStream = require("fs").createReadStream(filePath);
-  //     readStream.on("error", (err: any) => {
-  //       throw new ServerError("Failed to read Quran data file", 500);
-  //     });
-  //     readStream.pipe(res);
-  //   }
+    if (isNaN(surahId) || surahId < 1 || surahId > 114) {
+      throw new ServerError(
+        "Invalid surah ID. Must be between 1 and 114.",
+        400
+      );
+    }
+    const data = await getQuranData(lang);
+
+    const surah = data.find((s: any) => s.id === surahId);
+    if (!surah) {
+      throw new ServerError("Surah not found", 404);
+    }
+
+    const audioData = {
+      "1": {
+        reciter: "Mishary Rashid Al-Afasy",
+        url: `https://server8.mp3quran.net/afs/${surahId
+          .toString()
+          .padStart(3, "0")}.mp3`,
+        originalUrl: `https://server8.mp3quran.net/afs/${surahId
+          .toString()
+          .padStart(3, "0")}.mp3`,
+        type: "complete_surah",
+      },
+      "2": {
+        reciter: "Abu Bakr Al-Shatri",
+        url: `https://server11.mp3quran.net/shatri/${surahId
+          .toString()
+          .padStart(3, "0")}.mp3`,
+        originalUrl: `https://server11.mp3quran.net/shatri/${surahId
+          .toString()
+          .padStart(3, "0")}.mp3`,
+        type: "complete_surah",
+      },
+      "3": {
+        reciter: "Nasser Al-Qatami",
+        url: `https://server6.mp3quran.net/qtm/${surahId
+          .toString()
+          .padStart(3, "0")}.mp3`,
+        originalUrl: `https://server6.mp3quran.net/qtm/${surahId
+          .toString()
+          .padStart(3, "0")}.mp3`,
+        type: "complete_surah",
+      },
+      "4": {
+        reciter: "Yasser Al-Dosari",
+        url: `https://server11.mp3quran.net/yasser/${surahId
+          .toString()
+          .padStart(3, "0")}.mp3`,
+        originalUrl: `https://server11.mp3quran.net/yasser/${surahId
+          .toString()
+          .padStart(3, "0")}.mp3`,
+        type: "complete_surah",
+      },
+    };
+
+    res.json({
+      language: lang,
+      audio: audioData,
+      ...surah,
+    });
+  }
+
+  static async getVerseById(req: Request, res: Response) {
+    const lang = getFallbackLanguage(req.query.lang as string);
+    const verseId = parseInt(req.params.verseid!, 10);
+    const surahId = parseInt(req.params.id!, 10);
+    if (isNaN(surahId) || surahId < 1 || surahId > 114) {
+      throw new ServerError(
+        "Invalid surah ID. Must be between 1 and 114.",
+        400
+      );
+    }
+
+    if (isNaN(verseId) || verseId < 1) {
+      throw new ServerError(
+        "Invalid verse ID. Must be a positive number.",
+        400
+      );
+    }
+
+    const data = await getQuranData(lang);
+
+    const surah = data.find((s: any) => s.id === surahId);
+    if (!surah) {
+      throw new ServerError("Surah not found", 404);
+    }
+
+    // Find the requested verse
+    const verse = surah.verses.find((v: any) => v.id === verseId);
+
+    if (!verse) {
+      throw new ServerError("Verse not found", 404);
+    }
+    // Add audio data for the specific verse
+    const audioData = {
+      "1": {
+        reciter: "Mishary Rashid Al-Afasy",
+        url: `https://everyayah.com/data/Alafasy_128kbps/${surahId
+          .toString()
+          .padStart(3, "0")}${verseId.toString().padStart(3, "0")}.mp3`,
+        originalUrl: `https://everyayah.com/data/Alafasy_128kbps/${surahId
+          .toString()
+          .padStart(3, "0")}${verseId.toString().padStart(3, "0")}.mp3`,
+        type: "single_verse",
+      },
+      "2": {
+        reciter: "Abu Bakr Al-Shatri",
+        url: `https://everyayah.com/data/Abu_Bakr_Ash-Shaatree_128kbps/${surahId
+          .toString()
+          .padStart(3, "0")}${verseId.toString().padStart(3, "0")}.mp3`,
+        originalUrl: `https://everyayah.com/data/Abu_Bakr_Ash-Shaatree_128kbps/${surahId
+          .toString()
+          .padStart(3, "0")}${verseId.toString().padStart(3, "0")}.mp3`,
+        type: "single_verse",
+      },
+      "3": {
+        reciter: "Nasser Al-Qatami",
+        url: `https://everyayah.com/data/Nasser_Alqatami_128kbps/${surahId
+          .toString()
+          .padStart(3, "0")}${verseId.toString().padStart(3, "0")}.mp3`,
+        originalUrl: `https://everyayah.com/data/Nasser_Alqatami_128kbps/${surahId
+          .toString()
+          .padStart(3, "0")}${verseId.toString().padStart(3, "0")}.mp3`,
+        type: "single_verse",
+      },
+      "4": {
+        reciter: "Yasser Al-Dosari",
+        url: `https://everyayah.com/data/Yasser_Ad-Dussary_128kbps/${surahId
+          .toString()
+          .padStart(3, "0")}${verseId.toString().padStart(3, "0")}.mp3`,
+        originalUrl: `https://everyayah.com/data/Yasser_Ad-Dussary_128kbps/${surahId
+          .toString()
+          .padStart(3, "0")}${verseId.toString().padStart(3, "0")}.mp3`,
+        type: "single_verse",
+      },
+    };
+
+    res.json({
+      language: lang,
+      surah: {
+        id: surah.id,
+        name: surah.name,
+        transliteration: surah.transliteration,
+        translation: surah.translation,
+      },
+      verse,
+      audio: audioData,
+    });
+  }
 }
