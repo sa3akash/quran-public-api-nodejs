@@ -11,7 +11,7 @@
   },
 
   "paths": {
-    "/api/health": {
+    "/health": {
       "get": {
         "summary": "Health check",
         "responses": {

@@ -5,5 +5,5 @@ import { quranRouter } from "./quran.routers";
 
 export const mainRouter = (app:Application) => {
     app.use("/api/quran",quranRouter.initializeRoutes())
-    app.use("/api",healthRouter.initializeRoutes())
+    app.use(healthRouter.initializeRoutes())
 }
