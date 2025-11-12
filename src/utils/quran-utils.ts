@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
 
+import fsAsync from "fs/promises";
+
 export interface Language {
   code: string
   name: string
@@ -149,4 +151,18 @@ export function getVerseAudioUrl(surahId: number, verseId: number, reciterId = "
   const formattedVerseId = verseId.toString().padStart(3, "0")
 
   return `${reciter.baseUrl}${formattedSurahId}${formattedVerseId}.mp3`
+}
+
+
+
+export async function loadQuranFromDisk(
+  lang: string
+): Promise<{ data: any; mtimeMs: number }> {
+  const fileName = getQuranFileName(lang);
+  const filePath = path.join(__dirname, "quran", fileName);
+  const stat = await fsAsync.stat(filePath);
+  const raw = await fsAsync.readFile(filePath);
+  const data = JSON.parse(raw.toString());
+
+  return { data, mtimeMs: stat.mtimeMs };
 }

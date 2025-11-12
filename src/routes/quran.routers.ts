@@ -11,6 +11,7 @@ class QuranRouter {
 
   public initializeRoutes() {
     this.router.get("/", QuranController.getQuran);
+    this.router.get("/search", QuranController.search);
     return this.router;
   }
 }
