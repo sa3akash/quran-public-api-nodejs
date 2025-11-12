@@ -1,0 +1,119 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Quran Public API",
+    "version": "1.0.0",
+    "description": "File-backed API that serves Quran surahs, verses, search and language metadata."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Quran Api"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Server health",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" },
+                    "timestamp": { "type": "string", "format": "date-time" },
+                    "uptime": { "type": "number" },
+                    "ip": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quran": {
+      "get": {
+        "summary": "List surahs (summary)",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Language code (optional)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Surah list",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quran/languages": {
+      "get": {
+        "summary": "Available languages",
+        "responses": {
+          "200": {
+            "description": "Array of language objects",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "object" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quran/search": {
+      "get": {
+        "summary": "Search verses",
+        "parameters": [
+          { "name": "q", "in": "query", "required": true, "schema": { "type": "string" }, "description": "Query (min length 3)" },
+          { "name": "lang", "in": "query", "schema": { "type": "string" }, "description": "Language code (optional)" }
+        ],
+        "responses": {
+          "200": { "description": "Search results", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "400": { "description": "Bad request (invalid query)" }
+        }
+      }
+    },
+    "/api/quran/surah/{id}": {
+      "get": {
+        "summary": "Get surah by id",
+        "parameters": [
+          { "name": "surah_id", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "lang", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Surah object", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "400": { "description": "Invalid surah id" },
+          "404": { "description": "Surah not found" }
+        }
+      }
+    },
+    "/api/quran/surah/{id}/verse/{verseid}": {
+      "get": {
+        "summary": "Get a single verse",
+        "parameters": [
+          { "name": "surah_id", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "verse_id", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "lang", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Verse object", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "400": { "description": "Invalid request" },
+          "404": { "description": "Not found" }
+        }
+      }
+    }
+  }
+}

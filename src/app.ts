@@ -6,6 +6,8 @@ import { globalErrorHandler } from "error-express";
 import comprassion from "compression";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "./swagger.json";
 
 const app = express();
 
@@ -69,6 +71,9 @@ app.use(
 
 // routus
 mainRouter(app);
+
+// Swagger UI
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(globalErrorHandler);
 
