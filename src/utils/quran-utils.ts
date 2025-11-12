@@ -1,3 +1,6 @@
+import fs from "fs";
+import path from "path";
+
 export interface Language {
   code: string
   name: string
@@ -58,68 +61,35 @@ export const LANGUAGE_MAP: Record<string, Language> = {
 // Cache for storing fetched JSON data
 const dataCache = new Map<string, any>()
 
-// Fetch JSON file from public directory
-export async function fetchJsonFile(fileName: string, baseUrl?: string): Promise<any> {
-  try {
-    // Use cache if available
-    if (dataCache.has(fileName)) {
-      return dataCache.get(fileName)
-    }
-
-    // Determine the base URL
-    const url = baseUrl ? `${baseUrl}/${fileName}` : `/${fileName}`
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ${fileName}: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
-
-    // Cache the data
-    dataCache.set(fileName, data)
-
-    return data
-  } catch (error) {
-    console.error(`Error fetching JSON file: ${fileName}`, error)
-    return null
-  }
-}
-
 // Get the appropriate file name for a language
 export function getQuranFileName(lang: string): string {
   return lang === "transliteration" ? "quran_transliteration.json" : lang === "ar" ? "quran.json" : `quran_${lang}.json`
 }
 
 // Check if a language is supported by trying to fetch its file
-export async function isLanguageSupported(lang: string, baseUrl?: string): Promise<boolean> {
+export function isLanguageSupported(lang: string, baseUrl?: string): boolean {
   const fileName = getQuranFileName(lang)
-  const data = await fetchJsonFile(fileName, baseUrl)
-  return data !== null
+  return fs.existsSync(path.join(__dirname, "quran", fileName))
 }
 
 // Get a fallback language if the requested one is not available
-export async function getFallbackLanguage(requestedLang: string, baseUrl?: string): Promise<string> {
-  if (await isLanguageSupported(requestedLang, baseUrl)) {
+export  function getFallbackLanguage(requestedLang: string): string {
+  if (isLanguageSupported(requestedLang)) {
     return requestedLang
   }
 
   // Try English first
-  if (await isLanguageSupported("en", baseUrl)) {
+  if (isLanguageSupported("en")) {
     return "en"
   }
 
   // Try Arabic next
-  if (await isLanguageSupported("ar", baseUrl)) {
+  if (isLanguageSupported("ar")) {
     return "ar"
   }
 
   // Try Bengali next (since this is a Bangla Quran API)
-  if (await isLanguageSupported("bn", baseUrl)) {
+  if (isLanguageSupported("bn")) {
     return "bn"
   }
 

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { QuranController } from "../controllers/quran.controller";
 
 class QuranRouter {
   private router: Router;
@@ -9,18 +10,7 @@ class QuranRouter {
   }
 
   public initializeRoutes() {
-    this.router.get("/health", (req, res) => {
-      res.json({
-        status: "OK",
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        ip:
-          req.ip ||
-          req.headers["x-forwarded-for"] ||
-          req.socket.remoteAddress ||
-          "unknown",
-      });
-    });
+    this.router.get("/", QuranController.getQuran);
     return this.router;
   }
 }
