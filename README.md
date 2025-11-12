@@ -23,7 +23,7 @@ Prerequisites:
 Clone and install:
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/sa3akash/quran-public-api-nodejs.git
 cd quran-public-api-nodejs
 npm install
 ```
@@ -195,8 +195,13 @@ Feel free to open issues or PRs. For adding languages:
 
 This repository does not include an explicit license file. Add a LICENSE file if you want to set licensing terms.
 
+## Developer / Maintainer
+
+- Name: Shakil Ahmed
+- GitHub: https://github.com/sa3akash
+
 ## Contact
 
-For questions, open an issue in the repository.
+For questions or support, open an issue in the repository or contact the maintainer on GitHub: https://github.com/sa3akash
 
 

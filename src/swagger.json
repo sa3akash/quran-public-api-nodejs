@@ -3,14 +3,13 @@
   "info": {
     "title": "Quran Public API",
     "version": "1.0.0",
-    "description": "File-backed API that serves Quran surahs, verses, search and language metadata."
-  },
-  "servers": [
-    {
-      "url": "/",
-      "description": "Quran Api"
+    "description": "File-backed API that serves Quran surahs, verses, search and language metadata.",
+    "contact": {
+      "name": "Shakil Ahmed",
+      "url": "https://github.com/sa3akash"
     }
-  ],
+  },
+
   "paths": {
     "/api/health": {
       "get": {

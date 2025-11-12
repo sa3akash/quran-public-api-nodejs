@@ -73,7 +73,7 @@ app.use(
 mainRouter(app);
 
 // Swagger UI
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(globalErrorHandler);
 

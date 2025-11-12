@@ -1,15 +1,20 @@
 {
   "name": "quran-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "File-backed Quran REST API (serves surahs, verses, search and language metadata)",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon src/app.ts",
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "start": "node dist/app.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["quran", "api", "nodejs", "express", "translation"],
+  "author": "Shakil Ahmed (sa3akash)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sa3akash/quran-public-api-nodejs.git"
+  },
+  "homepage": "https://github.com/sa3akash/quran-public-api-nodejs",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
