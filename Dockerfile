@@ -31,5 +31,6 @@ COPY --from=prerelease /usr/src/app/package.json .
 
 # run the app
 USER node
-EXPOSE 5500/tcp
-CMD ["node", "run", "start"]
+ENV PORT=5200
+EXPOSE 5200/tcp
+CMD ["node", "dist/app.js"]
