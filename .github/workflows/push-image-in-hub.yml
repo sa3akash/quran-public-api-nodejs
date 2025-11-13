@@ -2,10 +2,10 @@ name: Build, Test, Scan and Push Docker Image
 
 on:
   push:
-    # branches:
-    #   - main
-    tags:
-      - "v*" # Trigger on version tags like v1.0.0
+    branches:
+      - main
+    # tags:
+    #   - "v*" # Trigger on version tags like v1.0.0
 
 env:
   WORKING_DIR: ./ # Define once for all jobs
@@ -44,7 +44,14 @@ jobs:
           cache: "npm"
           cache-dependency-path: ${{ env.WORKING_DIR }}/package-lock.json
 
-      - name: 📦 Install Dependencies
+      - name: 🗂️ Cache node_modules
+        uses: actions/cache@v4
+        id: node-cache
+        with:
+          path: ${{ env.WORKING_DIR }}/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles(format('{0}/package-lock.json', env.WORKING_DIR)) }}
+
+      - name: 📦 Install Deps
         working-directory: ${{ env.WORKING_DIR }}
         run: npm install --legacy-peer-deps
 
