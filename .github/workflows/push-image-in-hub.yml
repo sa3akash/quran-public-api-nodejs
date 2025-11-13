@@ -46,7 +46,7 @@ jobs:
 
       - name: 📦 Install Dependencies
         working-directory: ${{ env.WORKING_DIR }}
-        run: npm ci --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
   build-code:
     needs: [setup, install]
@@ -211,7 +211,7 @@ jobs:
 
 # ==================================
 
-# git tag v1.1.4
-# git push origin v1.1.4 --tags
+# git tag v1.1.5
+# git push origin v1.1.5 --tags
 
 # ==================================
