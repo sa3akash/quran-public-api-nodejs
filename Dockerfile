@@ -6,12 +6,12 @@ WORKDIR /usr/src/app
 FROM base AS install
 RUN mkdir -p /temp/dev
 COPY package.json package-lock.json /temp/dev/
-RUN cd /temp/dev && npm install
+RUN cd /temp/dev && npm install --legacy-peer-deps
 
 # install with --production (exclude devDependencies)
 RUN mkdir -p /temp/prod
 COPY package.json package-lock.json /temp/prod/
-RUN cd /temp/prod && npm install --production
+RUN cd /temp/prod && npm install --only=production
 
 # copy node_modules from temp directory
 # then copy all (non-ignored) project files into the image
