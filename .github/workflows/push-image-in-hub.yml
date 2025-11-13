@@ -2,10 +2,10 @@ name: Build, Test, Scan and Push Docker Image
 
 on:
   push:
-    branches:
-      - main
-    # tags:
-    #   - "v*" # Trigger on version tags like v1.0.0
+    # branches:
+    #   - main
+    tags:
+      - "v*" # Trigger on version tags like v1.0.0
 
 env:
   WORKING_DIR: ./ # Define once for all jobs
@@ -202,7 +202,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.LOGIN_GITHUB_TOKEN }}
 
       - name: 📥 Download Images
         uses: actions/download-artifact@v4
@@ -224,7 +224,7 @@ jobs:
 
 # ==================================
 
-# git tag v1.1.6
-# git push origin v1.1.6 --tags
+# git tag v1.1.7
+# git push origin v1.1.7 --tags
 
 # ==================================
