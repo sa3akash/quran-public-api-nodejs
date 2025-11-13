@@ -101,7 +101,7 @@
         }
       }
     },
-    "/api/quran/surah/{id}": {
+    "/api/quran/surah/{surah_id}": {
       "get": {
         "summary": "Get surah by id",
         "parameters": [
@@ -125,7 +125,7 @@
         }
       }
     },
-    "/api/quran/surah/{id}/verse/{verseid}": {
+    "/api/quran/surah/{surah_id}/verse/{verse_id}": {
       "get": {
         "summary": "Get a single verse",
         "parameters": [
