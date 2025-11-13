@@ -55,7 +55,13 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v3
 
-      - name: 🏗️ Build Node.js app
+      - name: 🗂️ Restore node_modules
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.WORKING_DIR }}/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles(format('{0}/package-lock.json', env.WORKING_DIR)) }}
+
+      - name: 🏗️ Build Nodejs app
         working-directory: ${{ env.WORKING_DIR }}
         run: npm run build
 
@@ -211,7 +217,7 @@ jobs:
 
 # ==================================
 
-# git tag v1.1.5
-# git push origin v1.1.5 --tags
+# git tag v1.1.6
+# git push origin v1.1.6 --tags
 
 # ==================================
