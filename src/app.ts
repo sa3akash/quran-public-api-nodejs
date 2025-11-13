@@ -2,7 +2,7 @@ import express from "express";
 import "dotenv/config";
 import { config } from "./config";
 import { mainRouter } from "./routes";
-import { globalErrorHandler } from "error-express";
+import { globalErrorHandler, ServerError } from "error-express";
 import comprassion from "compression";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
@@ -84,8 +84,12 @@ mainRouter(app);
 // Swagger UI
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+app.use(()=>{
+  throw new ServerError("API endpoint not found",404);
+});
+
 app.use(globalErrorHandler);
 
 app.listen(config.PORT, () => {
-  console.log(`Server is running on port http://localhost:${config.PORT}`);
+  console.log(`Server is running on port http://localhost:${config.PORT}/docs`);
 });
